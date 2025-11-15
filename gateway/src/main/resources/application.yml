@@ -1,0 +1,45 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      default-filters:
+        - RemoveRequestHeader=Cookie
+
+      routes:
+        # Auth service ? không c?n JWT
+        - id: auth-service
+          uri: http://localhost:3001
+          predicates:
+            - Path=/api/auth/**
+
+        # Station service
+        - id: station-service
+          uri: http://localhost:3002
+          predicates:
+            - Path=/api/stations/**
+          filters:
+            - JwtAuthFilter
+
+        # Train service
+        - id: train-service
+          uri: http://localhost:3003
+          predicates:
+            - Path=/api/trains/**
+          filters:
+            - JwtAuthFilter
+
+        # Schedule service
+        - id: schedule-service
+          uri: http://localhost:3004
+          predicates:
+            - Path=/api/schedules/**
+          filters:
+            - JwtAuthFilter
+app:
+  jwt:
+    secret: "90cecfe92ffd7125430402ad5b123a07a5a14968426d833ae6ed279264dc0f03"
