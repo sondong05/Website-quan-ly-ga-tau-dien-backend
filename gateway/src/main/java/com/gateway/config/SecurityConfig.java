@@ -12,12 +12,14 @@ public class SecurityConfig {
 
     @Bean
     public SecurityWebFilterChain securityFilterChain(ServerHttpSecurity http) {
-
+        // Sửa lại:
+        // Logic phân quyền (authorizeExchange) đã được chuyển vào JwtAuthFilter
+        // Config này chỉ cần tắt CSRF và cho phép mọi request đi qua
+        // để đến được Global Filter của chúng ta.
         http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchanges -> exchanges
-                        .pathMatchers("/api/auth/**").permitAll()
-                        .anyExchange().permitAll()
+                        .anyExchange().permitAll() // Cho phép tất cả để đi tới GlobalFilter
                 );
 
         return http.build();

@@ -2,6 +2,8 @@ package com.schedule_service.service;
 
 import com.schedule_service.dto.ScheduleRequest;
 import com.schedule_service.dto.ScheduleResponse;
+import com.schedule_service.exception.BadRequestException; // THÊM
+import com.schedule_service.exception.ResourceNotFoundException; // THÊM
 import com.schedule_service.model.Schedule;
 import com.schedule_service.repository.ScheduleRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +25,9 @@ public class ScheduleService {
     }
 
     public ScheduleResponse getSchedule(Long id) {
-        Schedule s = repo.findById(id).orElseThrow(() -> new RuntimeException("Schedule not found"));
+        // SỬA: Ném exception 404
+        Schedule s = repo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Schedule not found with id: " + id));
         return mapToResponse(s);
     }
 
@@ -42,7 +46,9 @@ public class ScheduleService {
     }
 
     public ScheduleResponse updateSchedule(Long id, ScheduleRequest req) {
-        Schedule s = repo.findById(id).orElseThrow(() -> new RuntimeException("Schedule not found"));
+        // SỬA: Ném exception 404
+        Schedule s = repo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Schedule not found with id: " + id));
         s.setTrainId(req.getTrainId());
         s.setDepartureStation(req.getDepartureStation());
         s.setArrivalStation(req.getArrivalStation());
@@ -54,16 +60,21 @@ public class ScheduleService {
     }
 
     public ScheduleResponse updateStatus(Long id, String status) {
-        Schedule s = repo.findById(id).orElseThrow(() -> new RuntimeException("Schedule not found"));
+        // SỬA: Ném exception 404
+        Schedule s = repo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Schedule not found with id: " + id));
         s.setStatus(status);
         return mapToResponse(repo.save(s));
     }
 
     public ScheduleResponse reserveSeat(Long id, int seatsToBook) {
-        Schedule s = repo.findById(id).orElseThrow(() -> new RuntimeException("Schedule not found"));
+        // SỬA: Ném exception 404
+        Schedule s = repo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Schedule not found with id: " + id));
 
         if (s.getBookedSeats() + seatsToBook > s.getTotalSeats()) {
-            throw new RuntimeException("Not enough available seats");
+            // SỬA: Ném exception 400
+            throw new BadRequestException("Not enough available seats");
         }
 
         s.setBookedSeats(s.getBookedSeats() + seatsToBook);
@@ -71,6 +82,7 @@ public class ScheduleService {
     }
 
     private ScheduleResponse mapToResponse(Schedule s) {
+        // ... (Không đổi) ...
         return ScheduleResponse.builder()
                 .id(s.getId())
                 .trainId(s.getTrainId())
